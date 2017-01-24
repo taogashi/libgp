@@ -9,30 +9,36 @@
 #include <vector>
 
 namespace libgp {
-  
-  /** Container holding training patterns.
-   *  @author Manuel Blum */
-  class SampleSet
-  {
-  public:
+
+/** Container holding training patterns.
+ *  @author Manuel Blum */
+class SampleSet
+{
+public:
     /** Constructor.
      *  @param input_dim dimensionality of input vectors */
     SampleSet (int input_dim);
+    SampleSet (int input_dim, int info_dim);
 
     /** Copy constructor */
     SampleSet ( const SampleSet& ss );
 
-    /** Destructor. */    
+    /** Destructor. */
     virtual ~SampleSet();
-    
+
     /** Add input-output pattern to sample set.
      *  @param x input array
      *  @param y target value */
     void add(const double x[], double y);
     void add(const Eigen::VectorXd x, double y);
-    
+
+    void add(const double x[], double y, const double info[]);
+    void add(const Eigen::VectorXd x, double y, const Eigen::VectorXd info);
+
     /** Get input vector at index k. */
     const Eigen::VectorXd & x (size_t k);
+
+    const Eigen::VectorXd & info (size_t k);
 
     /** Get target value at index k. */
     double y (size_t k);
@@ -42,31 +48,35 @@ namespace libgp {
 
     /** Get reference to vector of target values. */
     const std::vector<double>& y();
-    
+
     /** Get number of samples. */
     size_t size();
-    
+
     /** Clear sample set. */
     void clear();
-    
+
     /** Check if sample set is empty. */
     bool empty ();
 
 
-  private:
+private:
 
     /** Container holding input vectors. */
     std::vector<Eigen::VectorXd *> inputs;
-    
+
+    std::vector<Eigen::VectorXd *> info_;
+
     /** Container holding target values. */
     std::vector<double> targets;
-    
+
     /** Dimensionality of input vectors. */
     size_t input_dim;
-    
+
+    size_t info_dim_;
+
     /** Number of samples. */
     size_t n;
-  };
+};
 }
 
 #endif /* __SAMPLESET_H__ */

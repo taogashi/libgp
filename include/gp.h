@@ -35,6 +35,8 @@ namespace libgp {
     /** Create and instance of GaussianProcess with given input dimensionality 
      *  and covariance function. */
     GaussianProcess (size_t input_dim, std::string covf_def);
+
+    GaussianProcess (size_t input_dim, size_t info_dim, std::string covf_def);
     
     /** Create and instance of GaussianProcess from file. */
     GaussianProcess (const char * filename);
@@ -64,6 +66,7 @@ namespace libgp {
      */
     void add_pattern(const double x[], double y);
 
+    void add_pattern(const double x[], double y, const double info[]);
 
     bool set_y(size_t i, double y);
 
@@ -104,6 +107,7 @@ namespace libgp {
     /** Input vector dimensionality. */
     size_t input_dim;
     
+	size_t info_dim_;
     /** Update test input and cache kernel vector. */
     void update_k_star(const Eigen::VectorXd &x_star);
 
