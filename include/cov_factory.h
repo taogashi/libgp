@@ -34,6 +34,9 @@ namespace libgp {
      *  @return instance of CovarianceFunction */
     libgp::CovarianceFunction* create(size_t input_dim, const std::string key);
     
+    libgp::CovarianceFunction* create(size_t input_dim,
+			size_t info_dim, const std::string key);
+
     /** Returns a string vector of available covariance functions. */
     std::vector<std::string> list();
     

@@ -19,7 +19,8 @@ int main (int argc, char const *argv[])
     double tss = 0, error, f, y;
     // initialize Gaussian process for 2-D input using the squared exponential
     // covariance function with additive white noise.
-    GaussianProcess gp(1, "CovSum ( CovSEiso, CovNoise)");
+
+    GaussianProcess gp(1, 1, "CovSum ( CovSEiso, CovNoise)");
     // initialize hyper parameter vector
     Eigen::VectorXd params(gp.covf().get_param_dim());
     params << 0.0, 0.0, -2.0;

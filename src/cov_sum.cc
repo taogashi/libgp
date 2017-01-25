@@ -7,54 +7,62 @@
 
 namespace libgp
 {
-  
-  CovSum::CovSum()
-  {
-  }
-  
-  CovSum::~CovSum()
-  {
-    delete first;
-    delete second;
-  }
-  
-  bool CovSum::init(int n, CovarianceFunction * first, CovarianceFunction * second)
-  {
-    this->input_dim = n;
-    this->first = first;
-    this->second = second;
-    param_dim_first = first->get_param_dim();
-    param_dim_second = second->get_param_dim();
-    param_dim = param_dim_first + param_dim_second;
-    loghyper.resize(param_dim);
-    loghyper.setZero();
+
+CovSum::CovSum()
+{
+	param_dim = 0;
+}
+
+CovSum::~CovSum()
+{ }
+
+bool CovSum::compound(Ptr cov_func)
+{
+    if (!cov_func) {
+        return false;
+    }
+    param_dim += cov_func->get_param_dim();
+    cov_funcs_.push_back(cov_func);
+	Eigen::VectorXd tmp(loghyper.size() + cov_func->get_param_dim());
+	tmp << loghyper, cov_func->get_loghyper();
+	loghyper = tmp;
     return true;
-  }
-  
-  double CovSum::get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2)
-  {
-    return first->get(x1, x2) + second->get(x1, x2);
-  }
-  
-  void CovSum::grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad)
-  {
-    Eigen::VectorXd grad_first(param_dim_first);
-    Eigen::VectorXd grad_second(param_dim_second);
-    first->grad(x1, x2, grad_first);
-    second->grad(x1, x2, grad_second);
-    grad.head(param_dim_first) = grad_first;
-    grad.tail(param_dim_second) = grad_second;
-  }
-  
-  void CovSum::set_loghyper(const Eigen::VectorXd &p)
-  {
+}
+
+double CovSum::get(const GPData& x1, const GPData& x2)
+{
+    double cov = 0.0;
+    for (auto func : cov_funcs_) {
+        cov += func->get(x1, x2);
+    }
+    return cov;
+}
+
+void CovSum::grad(const GPData& x1, const GPData& x2, Eigen::VectorXd &grad)
+{
+    grad.resize(param_dim);
+    int start_idx = 0;
+    for (auto func : cov_funcs_) {
+        Eigen::VectorXd grad_seg(func->get_param_dim());
+        func->grad(x1, x2, grad_seg);
+        grad.segment(start_idx, start_idx + func->get_param_dim() - 1)
+            = grad_seg;
+        start_idx += func->get_param_dim();
+    }
+}
+
+void CovSum::set_loghyper(const Eigen::VectorXd &p)
+{
     CovarianceFunction::set_loghyper(p);
-    first->set_loghyper(p.head(param_dim_first));
-    second->set_loghyper(p.tail(param_dim_second));
-  }
-  
-  std::string CovSum::to_string()
-  {
-    return "CovSum("+first->to_string()+", "+second->to_string()+")";
-  }
+    int start_idx = 0;
+    for (auto func : cov_funcs_) {
+        func->set_loghyper(p.segment(start_idx, start_idx + func->get_param_dim()));
+        start_idx += func->get_param_dim();
+    }
+}
+
+std::string CovSum::to_string()
+{
+    return "CovSum";
+}
 }

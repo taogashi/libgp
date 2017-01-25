@@ -89,6 +89,54 @@ namespace libgp {
     return covf;
   }
 
+  libgp::CovarianceFunction* CovFactory::create(size_t input_dim,
+		  size_t info_dim, const std::string key) {
+
+    CovarianceFunction * covf = NULL;
+
+    //remove whitespace 
+    std::string trimmed = key;
+    for(size_t i=0; i<trimmed.length(); i++) if(trimmed[i] == ' ') trimmed.erase(i,1);
+    
+    // find parenthesis
+    size_t left = trimmed.find_first_of('(');
+    size_t right = trimmed.find_last_of(')');
+    std::string func = trimmed.substr(0,left);
+    std::string arg;
+    int sep = 0;
+    if (left != right) {
+      arg = trimmed.substr(left);
+      size_t i = 0, pos = 0;
+      while ((pos = arg.find_first_of("(,)", pos)) != std::string::npos) {
+        if (arg.at(pos) == '(') i++;
+        else if (arg.at(pos) == ')') i--;
+        else if (arg.at(pos) == ',' && i == 1) sep = pos;
+        pos++;
+      }
+    }
+    std::map<std::string , CovFactory::create_func_def>::iterator it = registry.find(func);
+    if (it == registry.end()) {
+      std::cerr << "fatal error while parsing covariance function: " << func << " not found" << std::endl;
+      exit(0);
+    } 
+    covf = registry.find(func)->second();
+    if (left == right) {
+      bool res = covf->init(input_dim);
+      assert(res);
+    } else if (sep == 0) {
+      size_t sep = arg.find_first_of('/');
+      int filter = atoi(arg.substr(1,sep-1).c_str());
+      std::string second = arg.substr(sep+1, arg.length() - sep - 2);
+      bool res = covf->init(input_dim, filter, create(1, second));
+      assert(res);
+    } else {
+      bool res = covf->init(input_dim, 
+            create(input_dim, arg.substr(1,sep-1)), 
+            create(input_dim, arg.substr(sep+1, arg.length()-sep-2)));
+      assert(res);
+    }
+    return covf;
+  }
   std::vector<std::string> CovFactory::list()
   {
     std::vector<std::string> products;

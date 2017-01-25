@@ -7,43 +7,39 @@
 
 namespace libgp
 {
-  
-  CovSEiso::CovSEiso() {}
-  
-  CovSEiso::~CovSEiso() {}
-  
-  bool CovSEiso::init(int n)
-  {
-    input_dim = n;
+
+CovSEiso::CovSEiso()
+{
     param_dim = 2;
     loghyper.resize(param_dim);
     loghyper.setZero();
-    return true;
-  }
-  
-  double CovSEiso::get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2)
-  {
-    double z = ((x1-x2)/ell).squaredNorm();
+}
+
+CovSEiso::~CovSEiso() {}
+
+double CovSEiso::get(const GPData& x1, const GPData& x2)
+{
+    double z = ((x1.x-x2.x)/ell).squaredNorm();
     return sf2*exp(-0.5*z);
-  }
-  
-  void CovSEiso::grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad)
-  {
-    double z = ((x1-x2)/ell).squaredNorm();
+}
+
+void CovSEiso::grad(const GPData& x1, const GPData& x2, Eigen::VectorXd &grad)
+{
+    double z = ((x1.x-x2.x)/ell).squaredNorm();
     double k = sf2*exp(-0.5*z);
     grad << k*z, 2*k;
-  }
-  
-  void CovSEiso::set_loghyper(const Eigen::VectorXd &p)
-  {
+}
+
+void CovSEiso::set_loghyper(const Eigen::VectorXd &p)
+{
     CovarianceFunction::set_loghyper(p);
     ell = exp(loghyper(0));
     sf2 = exp(2*loghyper(1));
-  }
-  
-  std::string CovSEiso::to_string()
-  {
+}
+
+std::string CovSEiso::to_string()
+{
     return "CovSEiso";
-  }
-  
+}
+
 }

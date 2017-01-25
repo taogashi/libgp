@@ -2,10 +2,10 @@
 // Copyright (c) 2013, Manuel Blum <mblum@informatik.uni-freiburg.de>
 // All rights reserved.
 
-/*! 
- *  
+/*!
+ *
  *   \page licence Licensing
- *    
+ *
  *     libgp - Gaussian process library for Machine Learning
  *
  *      \verbinclude "../COPYING"
@@ -17,113 +17,96 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <Eigen/Dense>
+#include <vector>
 
 #include "cov.h"
 #include "sampleset.h"
 
 namespace libgp {
-  
-  /** Gaussian process regression.
-   *  @author Manuel Blum */
-  class GaussianProcess
-  {
-  public:
+
+/** Gaussian process regression.
+ *  @author Manuel Blum */
+class GaussianProcess
+{
+public:
+    GaussianProcess(const GaussianProcess&) = delete;
+    GaussianProcess& operator = (const GaussianProcess&) = delete;
 
     /** Empty initialization */
     GaussianProcess ();
-    
-    /** Create and instance of GaussianProcess with given input dimensionality 
-     *  and covariance function. */
-    GaussianProcess (size_t input_dim, std::string covf_def);
 
-    GaussianProcess (size_t input_dim, size_t info_dim, std::string covf_def);
-    
-    /** Create and instance of GaussianProcess from file. */
-    GaussianProcess (const char * filename);
-    
-    /** Copy constructor */
-    GaussianProcess (const GaussianProcess& gp);
-    
     virtual ~GaussianProcess ();
-    
-    /** Write current gp model to file. */
-    void write(const char * filename);
-    
-    /** Predict target value for given input.
-     *  @param x input vector
-     *  @return predicted value */
-    virtual double f(const double x[]);
-    
-    /** Predict variance of prediction for given input.
-     *  @param x input vector
-     *  @return predicted variance */
-    virtual double var(const double x[]);
-    
-    /** Add input-output-pair to sample set.
-     *  Add a copy of the given input-output-pair to sample set.
-     *  @param x input array
-     *  @param y output value
-     */
-    void add_pattern(const double x[], double y);
 
-    void add_pattern(const double x[], double y, const double info[]);
+    void set_cost_func(const CovarianceFunction::Ptr cf)
+    {
+        cost_func_ = cf;
+    }
 
-    bool set_y(size_t i, double y);
+    virtual bool evaluate(struct GPData& sample, double& f, double& var);
 
+    void add_pattern(const struct GPData& sample);
+
+    bool set_y(size_t i, double y)
+    {
+        if(sampleset_.set_y(i,y)) {
+            alpha_needs_update = true;
+            return true;
+        }
+        return false;
+    }
     /** Get number of samples in the training set. */
-    size_t get_sampleset_size();
-    
+    size_t get_sampleset_size()
+    {
+        return sampleset_.size();
+    }
+
     /** Clear sample set and free memory. */
-    void clear_sampleset();
-    
+    void clear_sampleset()
+    {
+        sampleset_.clear();
+    }
+
     /** Get reference on currently used covariance function. */
-    CovarianceFunction & covf();
-    
+    CovarianceFunction::Ptr covf()
+    {
+        return cost_func_;
+    }
+
     /** Get input vector dimensionality. */
-    size_t get_input_dim();
+    size_t get_input_dim()
+    {
+        return sampleset_.get_input_dim();
+    }
 
     double log_likelihood();
-    
+
     Eigen::VectorXd log_likelihood_gradient();
 
-  protected:
-    
-    /** The covariance function of this Gaussian process. */
-    CovarianceFunction * cf;
-    
-    /** The training sample set. */
-    SampleSet * sampleset;
-    
-    /** Alpha is cached for performance. */ 
+protected:
+    /** Alpha is cached for performance. */
     Eigen::VectorXd alpha;
-    
+
     /** Last test kernel vector. */
     Eigen::VectorXd k_star;
 
     /** Linear solver used to invert the covariance matrix. */
 //    Eigen::LLT<Eigen::MatrixXd> solver;
     Eigen::MatrixXd L;
-    
-    /** Input vector dimensionality. */
-    size_t input_dim;
-    
-	size_t info_dim_;
+
     /** Update test input and cache kernel vector. */
-    void update_k_star(const Eigen::VectorXd &x_star);
+    void update_k_star(const struct GPData &x_star);
 
     void update_alpha();
 
     /** Compute covariance matrix and perform cholesky decomposition. */
     virtual void compute();
-    
+
     bool alpha_needs_update;
 
-  private:
-
-    /** No assignement */
-    GaussianProcess& operator=(const GaussianProcess&);
-
-  };
+private:
+    CovarianceFunction::Ptr cost_func_;
+    SampleSet sampleset_;
+};
 }
 
 #endif /* __GP_H__ */

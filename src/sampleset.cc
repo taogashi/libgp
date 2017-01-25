@@ -7,43 +7,10 @@
 
 namespace libgp {
 
-SampleSet::SampleSet (int input_dim):
+SampleSet::SampleSet ():
+	input_dim_(0),
 	info_dim_(0)
-{
-    this->input_dim = input_dim;
-    n = 0;
-}
-
-SampleSet::SampleSet (int input_dim, int info_dim):
-	info_dim_(info_dim)
-{
-    this->input_dim = input_dim;
-    n = 0;
-}
-
-SampleSet::SampleSet ( const SampleSet& ss )
-{
-    // shallow copies
-    n = ss.n;
-    input_dim = ss.input_dim;
-	info_dim_ = ss.info_dim_;
-    targets = ss.targets;
-
-    // deep copy needed for vector of pointers
-    for (size_t i=0; i<ss.inputs.size(); ++i)
-    {
-        Eigen::VectorXd * sample_to_store = new Eigen::VectorXd(input_dim);
-        *sample_to_store = *ss.inputs.at(i);
-        inputs.push_back(sample_to_store);
-    }
-    // deep copy needed for vector of pointers
-    for (size_t i=0; i<ss.info_.size(); ++i)
-    {
-        Eigen::VectorXd * info_to_store = new Eigen::VectorXd(info_dim_);
-        *info_to_store = *ss.info_.at(i);
-        info_.push_back(info_to_store);
-    }
-}
+{ }
 
 SampleSet::~SampleSet()
 {

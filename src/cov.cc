@@ -13,11 +13,6 @@ namespace libgp
     return param_dim;
   }
   
-  size_t CovarianceFunction::get_input_dim()
-  {
-    return input_dim;
-  }
-  
   Eigen::VectorXd CovarianceFunction::get_loghyper()
   {
     return loghyper;
@@ -35,24 +30,5 @@ namespace libgp
     Eigen::Map<const Eigen::VectorXd> p_vec_map(p, param_dim);
     set_loghyper(p_vec_map);
   }
-
   
-  Eigen::VectorXd CovarianceFunction::draw_random_sample(Eigen::MatrixXd &X)
-  {
-    assert (X.cols() == int(input_dim));  
-    int n = X.rows();
-    Eigen::MatrixXd K(n, n);
-    Eigen::LLT<Eigen::MatrixXd> solver;
-    Eigen::VectorXd y(n);
-    // compute kernel matrix (lower triangle)
-    for(int i = 0; i < n; ++i) {
-      for(int j = i; j < n; ++j) {
-        K(j, i) = get(X.row(j), X.row(i));
-      }
-      y(i) = Utils::randn();
-    }
-    // perform cholesky factorization
-    solver = K.llt();  
-    return solver.matrixL() * y;
-  }
 }

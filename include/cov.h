@@ -9,6 +9,8 @@
 #include <vector>
 
 #include <Eigen/Dense>
+#include <boost/shared_ptr.hpp>
+#include <sampleset.h>
 
 namespace libgp
 {
@@ -20,44 +22,32 @@ namespace libgp
   class CovarianceFunction
   {
     public:
+		typedef boost::shared_ptr<CovarianceFunction> Ptr;
+		typedef boost::shared_ptr<const CovarianceFunction> ConstPtr;
+
       /** Constructor. */
-      CovarianceFunction() {};
+      CovarianceFunction()
+	  {};
 
       /** Destructor. */
       virtual ~CovarianceFunction() {};
 
-      /** Initialization method for atomic covariance functions. 
-       *  @param input_dim dimensionality of the input vectors */
-      virtual bool init(int input_dim) 
-      { 
-        return false;
-      };
-
-      /** Initialization method for compound covariance functions. 
-       *  @param input_dim dimensionality of the input vectors 
-       *  @param first first covariance function of compound
-       *  @param second second covariance function of compound */
-      virtual bool init(int input_dim, CovarianceFunction * first, CovarianceFunction * second)
-      {
-        return false;
-      };
-
-      virtual bool init(int input_dim, int filter, CovarianceFunction * covf)
-      {
-        return false;
-      };
+	  virtual bool compound(Ptr cov_func)
+	  {
+		  return false;
+	  }
 
       /** Computes the covariance of two input vectors.
        *  @param x1 first input vector
        *  @param x2 second input vector
        *  @return covariance of x1 and x2 */
-      virtual double get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2) = 0;
+      virtual double get(const GPData& x1, const GPData& x2) = 0;
 
       /** Covariance gradient of two input vectors with respect to the hyperparameters.
        *  @param x1 first input vector
        *  @param x2 second input vector
        *  @param grad covariance gradient */
-      virtual void grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad) = 0;
+      virtual void grad(const GPData& x1, const GPData& x2, Eigen::VectorXd &grad) = 0;
 
       /** Update parameter vector.
        *  @param p new parameter vector */
@@ -71,10 +61,6 @@ namespace libgp
        *  @return parameter vector dimensionality */
       size_t get_param_dim();
 
-      /** Get input dimensionality.
-       *  @return input dimensionality */
-      size_t get_input_dim();
-
       /** Get log-hyperparameter of covariance function.
        *  @return log-hyperparameter */
       Eigen::VectorXd get_loghyper();
@@ -83,17 +69,13 @@ namespace libgp
        *  @return string containing the name of this covariance function */
       virtual std::string to_string() = 0;
 
-      /** Draw random target values from this covariance function for input X. */
-      Eigen::VectorXd draw_random_sample(Eigen::MatrixXd &X);
-
       bool loghyper_changed;
 
     protected:
-      /** Input dimensionality. */
-      size_t input_dim;
-
       /** Size of parameter vector. */
       size_t param_dim;
+
+	  std::vector<Ptr> cov_funcs_;
 
       /** Parameter vector containing the log hyperparameters of the covariance function.
        *  The number of necessary parameters is given in param_dim. */

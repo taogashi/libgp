@@ -25,9 +25,8 @@ namespace libgp
   public:
     CovSEiso ();
     virtual ~CovSEiso ();
-    bool init(int n);
-    double get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2);
-    void grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad);
+    double get(const GPData& x1, const GPData& x2);
+      void grad(const GPData& x1, const GPData& x2, Eigen::VectorXd &grad);
     void set_loghyper(const Eigen::VectorXd &p);
     virtual std::string to_string();
   private:
