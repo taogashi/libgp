@@ -3,9 +3,6 @@
 // All rights reserved.
 
 #include "gp.h"
-#include "cov_noise.h"
-#include "cov_se_iso.h"
-#include "cov_sum.h"
 
 #include <iostream>
 #include <fstream>

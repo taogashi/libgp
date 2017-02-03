@@ -19,8 +19,9 @@
 #include <Eigen/Dense>
 #include <vector>
 
-#include "cov.h"
-#include "sampleset.h"
+#include "cov_noise.h"
+#include "cov_se_iso.h"
+#include "cov_sum.h"
 
 namespace libgp {
 
