@@ -44,6 +44,7 @@ public:
     }
 
     virtual bool evaluate(struct GPData& sample, double& f, double& var);
+    virtual bool evaluate(struct GPData& sample, double& f);
 
     void add_pattern(const struct GPData& sample);
 

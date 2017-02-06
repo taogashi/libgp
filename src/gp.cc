@@ -38,6 +38,16 @@ bool GaussianProcess::evaluate(struct GPData& sample, double& f, double& var)
 	return true;
 }
 
+bool GaussianProcess::evaluate(struct GPData& sample, double& f)
+{
+	if (sampleset_.empty()) return false;
+	compute();
+	update_alpha();
+	update_k_star(sample);
+	f = k_star.dot(alpha);
+	return true;
+}
+
 void GaussianProcess::compute()
 {
     // can previously computed values be used?
