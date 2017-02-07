@@ -88,15 +88,12 @@ protected:
     /** Alpha is cached for performance. */
     Eigen::VectorXd alpha;
 
-    /** Last test kernel vector. */
-    Eigen::VectorXd k_star;
-
     /** Linear solver used to invert the covariance matrix. */
 //    Eigen::LLT<Eigen::MatrixXd> solver;
     Eigen::MatrixXd L;
 
     /** Update test input and cache kernel vector. */
-    void update_k_star(const struct GPData &x_star);
+	Eigen::VectorXd update_k_star(const struct GPData &x_star);
 
     void update_alpha();
 

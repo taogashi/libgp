@@ -30,7 +30,9 @@ bool GaussianProcess::evaluate(struct GPData& sample, double& f, double& var)
 	if (sampleset_.empty()) return false;
 	compute();
 	update_alpha();
-	update_k_star(sample);
+
+    /** Last test kernel vector. */
+    Eigen::VectorXd k_star = update_k_star(sample);
 	f = k_star.dot(alpha);
 	int n = sampleset_.size();
 	Eigen::VectorXd v = L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solve(k_star);
@@ -43,7 +45,8 @@ bool GaussianProcess::evaluate(struct GPData& sample, double& f)
 	if (sampleset_.empty()) return false;
 	compute();
 	update_alpha();
-	update_k_star(sample);
+    /** Last test kernel vector. */
+    Eigen::VectorXd k_star = update_k_star(sample);
 	f = k_star.dot(alpha);
 	return true;
 }
@@ -68,12 +71,14 @@ void GaussianProcess::compute()
     alpha_needs_update = true;
 }
 
-void GaussianProcess::update_k_star(const struct GPData &x_star)
+Eigen::VectorXd GaussianProcess::update_k_star(const struct GPData &x_star)
 {
+    Eigen::VectorXd k_star;
     k_star.resize(sampleset_.size());
     for(size_t i = 0; i < sampleset_.size(); ++i) {
         k_star(i) = cost_func_->get(x_star, sampleset_.result()[i]);
     }
+	return k_star;
 }
 
 void GaussianProcess::update_alpha()
