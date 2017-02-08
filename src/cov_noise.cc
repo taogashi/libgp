@@ -15,6 +15,15 @@ CovNoise::CovNoise()
     loghyper.setZero();
 }
 
+CovNoise::CovNoise(const Eigen::VectorXd &p)
+{
+	assert(p.size() == 1);
+	param_dim = 1;
+	loghyper.resize(1);
+	CovarianceFunction::set_loghyper(p);
+    s2 = exp(2*loghyper(0));
+}
+
 CovNoise::~CovNoise() {}
 
 double CovNoise::get(const GPData& x1, const GPData& x2)

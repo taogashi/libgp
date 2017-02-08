@@ -15,6 +15,16 @@ CovSEiso::CovSEiso()
     loghyper.setZero();
 }
 
+CovSEiso::CovSEiso(const Eigen::VectorXd& p)
+{
+	assert(p.size() == 2);
+    param_dim = 2;
+	loghyper.resize(2);
+	CovarianceFunction::set_loghyper(p);
+    ell = exp(loghyper(0));
+    sf2 = exp(2*loghyper(1));
+}
+
 CovSEiso::~CovSEiso() {}
 
 double CovSEiso::get(const GPData& x1, const GPData& x2)

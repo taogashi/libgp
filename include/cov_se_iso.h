@@ -24,6 +24,7 @@ namespace libgp
   {
   public:
     CovSEiso ();
+    CovSEiso (const Eigen::VectorXd &p);
     virtual ~CovSEiso ();
     double get(const GPData& x1, const GPData& x2);
       void grad(const GPData& x1, const GPData& x2, Eigen::VectorXd &grad);
