@@ -34,7 +34,10 @@ int main (int argc, char const *argv[])
 	params << -1.0;
 	CovarianceFunction::Ptr covf1(new CovNoise(params));
 
-	CovarianceFunction::Ptr covf2(new CovSEard(Eigen::Vector3d(2.0, -2.0, 0.5)));
+	Eigen::VectorXd se_params(3);
+	se_params << 2.0, -2.0, 0.5;
+	CovarianceFunction::Ptr covf2(new CovSEard());
+	covf2->set_loghyper(se_params);
 
 	CovarianceFunction::Ptr covf3(new CovSum());
 	covf3->compound(covf2);

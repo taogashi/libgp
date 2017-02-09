@@ -44,6 +44,7 @@ namespace libgp
 	  assert(p.size() >= 2);
     loghyper.resize(p.size());
     CovarianceFunction::set_loghyper(p);
+	param_dim = p.size();
 	input_dim = p.size() - 1;
 	ell.resize(input_dim);
     for(size_t i = 0; i < input_dim; ++i) ell(i) = exp(loghyper(i));
